@@ -13,7 +13,9 @@ import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.commands.DriveCommand;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
 
 /**
@@ -28,6 +30,8 @@ public class Robot extends TimedRobot {
   public static OI m_oi;
 
   Command m_autonomousCommand;
+  DriveSubsystem driveSubsystem = new DriveSubsystem(10, 11);
+  DriveCommand driveCommand = new DriveCommand(driveSubsystem);
   SendableChooser<Command> m_chooser = new SendableChooser<>();
   SerialPort arduino;
 
@@ -39,9 +43,34 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     m_oi = new OI();
     arduino = new SerialPort(9600, SerialPort.Port.kUSB);
-    m_chooser.setDefaultOption("Default Auto", new ExampleCommand());
+    m_chooser.setDefaultOption("Drive with Arduino", driveCommand);
     // chooser.addOption("My Auto", new MyAutoCommand());
     SmartDashboard.putData("Auto mode", m_chooser);
+  }
+
+
+  void readPacket() {
+    while (true) {
+      byte[] buf =  arduino.read(1);
+      if ((buf != null) && (buf.length == 1) && (buf[0] == '$')) {
+        // Start of packet!
+        break;
+      }
+    }
+    byte[] theCommand = new byte[64];
+    int i = 0;
+    while (true) {
+      byte[] buf = arduino.read(1);
+      if ((buf != null) && (buf.length == 1) && (buf[0] == '\n')) {
+        // End of packet!
+        break;
+      }
+      else if ((buf != null) && (buf.length == 1)) {
+        theCommand[i++] = buf[0];
+      }
+    }
+    driveCommand.setCommand(theCommand);
+
   }
 
   /**
@@ -54,13 +83,15 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    int count = arduino.getBytesReceived();
+    readPacket();
+ /*   int count = arduino.getBytesReceived();
 
     byte[] buf = arduino.read(count);
     for (int i=0; i<buf.length; ++i) {
 
       System.out.println("BUF["+i+"] "+buf[i]);
     }
+    */
   }
 
   /**
@@ -90,7 +121,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_chooser.getSelected();
+   m_autonomousCommand = m_chooser.getSelected();
 
     /*
      * String autoSelected = SmartDashboard.getString("Auto Selector",
