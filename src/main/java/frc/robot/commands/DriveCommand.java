@@ -54,6 +54,7 @@ public class DriveCommand extends Command {
   protected void end() {
     this.x = 0;
     this.y = 0;
+    subsystem.setMotorSpeed(0, 0);
   }
 
   // Called when another command which requires one or more of the same
