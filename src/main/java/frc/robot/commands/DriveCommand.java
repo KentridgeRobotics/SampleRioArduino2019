@@ -12,8 +12,8 @@ import frc.robot.subsystems.DriveSubsystem;
 
 public class DriveCommand extends Command {
 
-  private int x;
-  private int y;
+  private double x;
+  private double y;
   private final DriveSubsystem subsystem;
 
   public DriveCommand(DriveSubsystem subsystem) {
@@ -26,15 +26,18 @@ public class DriveCommand extends Command {
   // Called just before this Command runs the first time
   @Override
   protected void initialize() {
-    this.x = 0;
-    this.y = 0;
+    this.x = 0.0;
+    this.y = 0.0;
   }
 
   public void setCommand(byte[] command) {
     String s = new String(command);
+    System.err.println("COMMAND: "+s);
     String[] xyStrs = s.split(",");
-    this.x = Integer.parseInt(xyStrs[0]);
-    this.y = Integer.parseInt(xyStrs[1]);
+    double xAbs =  (double) Integer.parseInt(xyStrs[0].trim());
+    double yAbs = (double) Integer.parseInt(xyStrs[1].trim());
+    this.x = (xAbs - 500.0) / 600.0;
+    this.y = (yAbs - 500.0) / 600.0;
   } 
 
   // Called repeatedly when this Command is scheduled to run

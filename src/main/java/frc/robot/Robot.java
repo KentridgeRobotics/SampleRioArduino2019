@@ -30,7 +30,7 @@ public class Robot extends TimedRobot {
   public static OI m_oi;
 
   Command m_autonomousCommand;
-  DriveSubsystem driveSubsystem = new DriveSubsystem(10, 11);
+  DriveSubsystem driveSubsystem = new DriveSubsystem(1, 2);
   DriveCommand driveCommand = new DriveCommand(driveSubsystem);
   SendableChooser<Command> m_chooser = new SendableChooser<>();
   SerialPort arduino;
@@ -41,11 +41,13 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
+    System.err.println("ROBOT INIT");
     m_oi = new OI();
     arduino = new SerialPort(9600, SerialPort.Port.kUSB);
     m_chooser.setDefaultOption("Drive with Arduino", driveCommand);
     // chooser.addOption("My Auto", new MyAutoCommand());
     SmartDashboard.putData("Auto mode", m_chooser);
+    m_autonomousCommand = driveCommand;
   }
 
 
@@ -55,7 +57,7 @@ public class Robot extends TimedRobot {
       if ((buf != null) && (buf.length == 1) && (buf[0] == '$')) {
         // Start of packet!
         break;
-      }
+      } 
     }
     byte[] theCommand = new byte[64];
     int i = 0;
@@ -101,6 +103,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void disabledInit() {
+    System.err.println("HELLO DISABLE");
+
   }
 
   @Override
@@ -121,7 +125,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-   m_autonomousCommand = m_chooser.getSelected();
+    System.err.println("HELLO AUTO");
+  // m_autonomousCommand = m_chooser.getSelected();
 
     /*
      * String autoSelected = SmartDashboard.getString("Auto Selector",
@@ -132,6 +137,7 @@ public class Robot extends TimedRobot {
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
+      System.err.println("STARTING COMMAND");
       m_autonomousCommand.start();
     }
   }
