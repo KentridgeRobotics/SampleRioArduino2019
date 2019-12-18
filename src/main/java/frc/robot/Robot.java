@@ -52,6 +52,9 @@ public class Robot extends TimedRobot {
 
 
   void readPacket() {
+    if (arduino.getBytesReceived() < 1) {
+      return;
+    }
     while (true) {
       byte[] buf =  arduino.read(1);
       if ((buf != null) && (buf.length == 1) && (buf[0] == '$')) {
@@ -85,7 +88,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    readPacket();
  /*   int count = arduino.getBytesReceived();
 
     byte[] buf = arduino.read(count);
@@ -142,11 +144,15 @@ public class Robot extends TimedRobot {
     }
   }
 
+  byte[] cmdbuf = new byte[1];
   /**
    * This function is called periodically during autonomous.
    */
   @Override
   public void autonomousPeriodic() {
+    cmdbuf[0] = 'j';
+    arduino.write(cmdbuf, 1);
+    readPacket();
     Scheduler.getInstance().run();
   }
 
